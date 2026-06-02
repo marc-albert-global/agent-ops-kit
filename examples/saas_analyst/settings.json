@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "metrics:read:*",
+      "guides:read:*",
+      "memory:recall:*"
+    ],
+    "deny": [
+      "metrics:write:*",
+      "data:export:raw"
+    ]
+  }
+}
