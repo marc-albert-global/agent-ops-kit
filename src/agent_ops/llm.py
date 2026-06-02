@@ -44,7 +44,7 @@ class LLMClient(Protocol):
 class EchoLLM:
     """Offline backend. Returns a structured echo of what it was asked.
 
-    Deterministic, no network, no key — lets the whole pipeline run in tests
+    Deterministic, no network, no key, lets the whole pipeline run in tests
     and dry-runs. It surfaces the assembled context so you can *see* the
     routing decisions the framework made.
     """
@@ -55,7 +55,7 @@ class EchoLLM:
         stable = sum(1 for b in system if b.stable)
         preview = "\n\n".join(b.text for b in system)
         text = (
-            "[EchoLLM — offline backend; set ANTHROPIC_API_KEY for real completions]\n\n"
+            "[EchoLLM, offline backend; set ANTHROPIC_API_KEY for real completions]\n\n"
             f"Request: {user}\n\n"
             f"Assembled system prompt: {len(system)} blocks ({stable} cache-eligible).\n"
             "----- begin system context -----\n"

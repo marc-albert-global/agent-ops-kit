@@ -11,7 +11,7 @@ with no credentials.
 from agent_ops import Agent
 
 QUERIES = [
-    "break down net new MRR — expansion vs new bookings this quarter",
+    "break down net new MRR, expansion vs new bookings this quarter",
     "how is gross vs net revenue retention trending year over year?",
     "where is the biggest drop-off in our signup-to-paid funnel?",
 ]

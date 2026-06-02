@@ -3,8 +3,8 @@
 Two layers are merged at load time, mirroring the durable-vs-experimental
 split that keeps a shared, reviewed policy separate from local one-off grants:
 
-- `settings.json`        — durable, shared, checked into version control.
-- `settings.local.json`  — personal/experimental, gitignored, overrides durable.
+- `settings.json`: durable, shared, checked into version control.
+- `settings.local.json`: personal/experimental, gitignored, overrides durable.
 
 A permission entry is a string pattern. `allow` grants, `deny` always wins.
 Patterns support a trailing `*` wildcard (e.g. ``"web:read:*"``).

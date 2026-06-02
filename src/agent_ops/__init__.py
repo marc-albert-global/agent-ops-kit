@@ -1,8 +1,8 @@
-"""agent-ops-kit — a framework for domain-agnostic operations agents.
+"""agent-ops-kit, a framework for domain-agnostic operations agents.
 
 Build an LLM agent that routes requests to modular skills, loads reference
 context on demand, learns to a persistent memory, and runs under a tiered
-permission policy — on any domain, with the domain content kept entirely in a
+permission policy, on any domain, with the domain content kept entirely in a
 workspace directory rather than in the framework.
 """
 

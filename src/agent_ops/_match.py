@@ -1,7 +1,7 @@
 """Lightweight lexical relevance scoring.
 
 Used by skill routing, guide loading, and memory recall to decide what is
-relevant to a request — without pulling in an embeddings dependency. The
+relevant to a request, without pulling in an embeddings dependency. The
 scoring is deliberately simple and explainable: tokenize, weight by overlap,
 boost exact trigger/keyword hits. Good enough to route, and easy to reason
 about in an interview.
@@ -34,7 +34,7 @@ def relevance(query: str, *, text: str = "", keywords: Iterable[str] = ()) -> fl
     """Score how relevant `text`/`keywords` are to `query`, in [0, ~).
 
     - Each shared content token contributes 1.0 (scaled by query length).
-    - Each exact keyword/trigger match contributes a 2.0 boost — keywords are
+    - Each exact keyword/trigger match contributes a 2.0 boost, keywords are
       curated, so a hit there is a stronger signal than incidental word overlap.
     """
     q_tokens = tokenize(query)

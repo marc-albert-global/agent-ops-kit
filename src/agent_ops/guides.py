@@ -5,7 +5,7 @@ that would blow the context budget if loaded wholesale on every request. The
 GuideLibrary indexes each guide by lightweight keywords and only reads a
 guide's full text into context when the request is relevant to it.
 
-This separates *routing* (always cheap — descriptions and keywords) from
+This separates *routing* (always cheap, descriptions and keywords) from
 *loading* (pay the tokens only when needed), which is what keeps a
 many-domain agent affordable.
 """

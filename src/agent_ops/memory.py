@@ -12,7 +12,7 @@ Each memory is one markdown file holding one durable fact, with frontmatter:
 
 The agent *recalls* memories relevant to a request (lexical scoring over the
 description) and *learns* new memories from a run. Persistence is just the
-filesystem — durable across process restarts, inspectable by a human, and
+filesystem, durable across process restarts, inspectable by a human, and
 trivially version-controllable.
 """
 

@@ -47,14 +47,14 @@ def main(argv: list[str] | None = None) -> int:
         agent = _load(args.workspace, dry_run=True)
         print(f"{len(agent.skills)} skills in {args.workspace}:")
         for s in agent.skills.skills:
-            print(f"  • {s.name} — {s.description}")
+            print(f"  • {s.name}, {s.description}")
         return 0
 
     if args.command == "memory":
         agent = _load(args.workspace, dry_run=True)
         print(f"{len(agent.memory)} memories in {args.workspace}:")
         for m in agent.memory.memories:
-            print(f"  • [{m.type}] {m.name} — {m.description}")
+            print(f"  • [{m.type}] {m.name}, {m.description}")
         return 0
 
     if args.command == "plan":

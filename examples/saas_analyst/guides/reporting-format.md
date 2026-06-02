@@ -13,4 +13,4 @@ Formatting rules for executive-facing metric answers:
    data doesn't support.
 4. State the measurement period, comparison period, and comparison type in a
    source line at the bottom.
-5. Keep the whole thing scannable — an executive should grasp it in 15 seconds.
+5. Keep the whole thing scannable, an executive should grasp it in 15 seconds.

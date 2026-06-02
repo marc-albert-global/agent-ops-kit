@@ -1,8 +1,8 @@
 """Session hooks.
 
 Hooks let an integrator inject behavior at well-defined points in an agent's
-lifecycle without modifying the core. The framework ships one lifecycle point —
-`session_start` — which produces orientation context the agent prepends to its
+lifecycle without modifying the core. The framework ships one lifecycle point,
+`session_start`, which produces orientation context the agent prepends to its
 system prompt (e.g. "you have N skills and M guides available").
 
 Register a hook with the decorator; it receives the live `Agent` and returns a

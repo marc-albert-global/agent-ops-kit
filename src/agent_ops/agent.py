@@ -1,4 +1,4 @@
-"""The Agent orchestrator — ties the framework together.
+"""The Agent orchestrator, ties the framework together.
 
 A single `run(query)` does the work that makes this an *operations* agent
 rather than a bare LLM call:
@@ -8,10 +8,10 @@ rather than a bare LLM call:
 3. load only the reference guides the request actually needs,
 4. recall relevant memories,
 5. assemble an ordered system prompt (stable framework/domain/guide context
-   first — cache-eligible — then volatile per-request context), and
+   first, cache-eligible, then volatile per-request context), and
 6. complete via the configured LLM backend.
 
-`plan(query)` runs steps 1–5 and returns the decisions without calling the
+`plan(query)` runs steps 1-5 and returns the decisions without calling the
 model, which is what `--dry-run` and the test-suite use.
 """
 
