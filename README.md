@@ -4,162 +4,130 @@
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-A small, dependency-light framework for building **domain-agnostic LLM
-operations agents**, the kind that sit next to a team, answer questions
-against a body of domain knowledge, and get sharper with use.
+**Stand up a domain expert AI agent for a team without rebuilding the plumbing,
+and keep its token bill flat as it grows.** A framework for "operations analyst"
+agents that route each request to the right playbook, load only the reference
+material that request needs, learn across sessions, and run under a permission
+policy you can actually ship.
 
-It packages five patterns that turn a bare LLM call into an operations agent:
+It exists because the hard part of deploying an LLM agent into a real
+organization is not the model call. It is keeping a large, evolving body of
+domain knowledge usable and affordable: loading the right slice per request,
+not paying for all of it every time, and giving operators control over what the
+agent may do.
+
+> Scope: a working framework with a neutral example workspace (SaaS-metrics
+> analyst). The patterns, not a specific domain agent, are the deliverable.
+
+---
+
+## Impact at a glance
+
+| | |
+|---|---|
+| Prompt size per call | **~49% fewer tokens** vs. loading every skill and guide (on-demand routing) |
+| Scaling property | the saving grows with the workspace: 40 skills still load only the few that match |
+| Repeat-call cost | stable prefix is cache-eligible, **~18% further input-cost cut** on warm-cache repeats |
+| Dependencies | **zero** runtime deps in the core; fully runnable and testable offline |
+| Extensibility | a new domain is a folder of files, not a code change |
+
+Numbers from `python examples/cost_analysis.py` on the example workspace; the
+routing saving rises sharply with more skills/guides.
+
+---
+
+## Problem and context
+
+Drop an LLM agent into a company and you hit three walls fast. (1) The domain
+knowledge is large and grows, so stuffing every playbook into every prompt is
+slow and expensive. (2) The agent has no memory of last week. (3) Letting it do
+anything is a non-starter for a cautious buyer. Teams end up rebuilding the same
+routing/loading/memory/permission scaffolding for each new agent. This framework
+is that scaffolding, done once, with the domain content kept entirely outside
+the code.
+
+## Approach
+
+Five patterns turn a bare `messages.create()` into a deployable operations agent:
 
 - **Skill routing**: modular units of domain instruction, auto-discovered and matched to each request, so only the relevant ones enter the prompt.
-- **On-demand context loading**: long reference guides are indexed cheaply and loaded into context *only* when a request needs them.
+- **On-demand context loading**: long reference guides are indexed cheaply and read into context only when a request needs them.
 - **Auto-learn memory**: a file-based memory the agent recalls from and writes back to, persistent across runs.
-- **Tiered permissions**: a durable, shared policy layered with local, experimental overrides.
+- **Tiered permissions**: a durable shared policy layered with local experimental overrides, so rollout is governed.
 - **Session hooks**: lifecycle extension points (e.g. startup orientation).
 
-The framework ships **zero** domain content. A domain lives entirely in a
-*workspace directory* (skills, guides, memory, settings). The included example
-is a neutral SaaS-metrics analyst; point it at a different workspace and it's a
-different agent.
-
-> Built as a clean-room generalization of a production internal operations
-> agent. No proprietary data, the patterns are the point.
-
----
-
-## Why it exists
-
-A single `messages.create()` call is stateless and context-blind: it can't
-decide *which* of your 40 playbooks applies, it has no memory of last week, and
-naïvely stuffing every guide into the system prompt is slow and expensive. This
-framework adds the routing/loading/memory layer around the call, and keeps the
-expensive, stable context cache-friendly so repeated requests are cheap.
+A domain lives entirely in a *workspace directory* (skills, guides, memory,
+settings). Point the agent at a different workspace and it is a different agent.
 
 ```
-                         ┌──────────────────────────────────────────┐
-   request ─────────────▶│                  Agent                    │
-                         │                                            │
-                         │  hooks ──▶ orientation                     │
-                         │  skills ─▶ route to relevant skills        │
-                         │  guides ─▶ load only what's needed         │
-                         │  memory ─▶ recall relevant facts           │
-                         │                                            │
-                         │  assemble system prompt:                   │
-                         │    [ framework + domain + guides ]  ◀─ cache-eligible (stable)
-                         │    [ orientation + skills + memory ] ◀─ volatile (per-request)
-                         └───────────────────┬────────────────────────┘
-                                             ▼
-                                    LLM backend (Anthropic / Echo)
-                                             │
-                          completion ◀───────┘   (optionally: learn() a new memory)
+request -> hooks (orientation) -> route to relevant skills -> load only needed guides
+        -> recall relevant memory -> assemble [stable prefix | volatile tail] -> LLM
 ```
 
-The stable blocks are placed first and carry the prompt-cache breakpoint, so
-the framework instructions, domain config, and loaded guides are served from
-cache on repeated requests while the per-request context stays uncached.
+The stable prefix (framework instructions + loaded guides) is placed first and
+marked cache-eligible; the volatile tail (orientation, routed skills, memory)
+follows. That layout is what makes repeat calls cheap.
 
----
+## From demo to deployment
 
-## Install
+How this maps to a real agent engagement:
+
+- **Onboard a client domain as a workspace**, not a fork. Their analysts' playbooks become skills; their reference docs become guides; nothing in the framework changes.
+- **Cost stays bounded as scope grows.** Routing means adding the 41st skill does not inflate every prompt; only matched skills load. This is the property that keeps a growing agent affordable.
+- **Permission tiers gate rollout.** Start read-only (`deny` writes), widen per capability as trust builds, with a durable shared policy plus local overrides.
+- **Memory makes it improve in place.** Confirmed answers and corrections persist and are recalled, so the agent gets sharper without redeployment.
+- **Decision rule for backends.** The `LLMClient` protocol lets you run the real model in production and a deterministic offline backend in CI and demos, with no API key.
+
+## Quickstart
 
 ```bash
 git clone https://github.com/marc-albert-global/agent-ops-kit.git
 cd agent-ops-kit
 python3 -m venv .venv && source .venv/bin/activate
-pip install -e ".[dev]"          # core + test deps; no API key needed
-# For real model completions:
-pip install -e ".[anthropic]" && export ANTHROPIC_API_KEY=sk-ant-...
+pip install -e ".[dev]"            # core + tests, no API key needed
+
+agent-ops skills                                   # list discovered skills
+agent-ops plan "how is net revenue retention trending?"   # show routing decisions
+agent-ops run --dry-run "how is churn trending?"   # full pipeline, offline backend
+python examples/cost_analysis.py                   # token-efficiency numbers
+pytest -q                                          # 27 tests, fully offline
 ```
 
-Python 3.9+. The core has **no runtime dependencies**; the Anthropic SDK is an
-optional extra. With no key, the agent uses a deterministic offline backend so
-everything is runnable and testable out of the box.
+For real completions: `pip install -e ".[anthropic]" && export ANTHROPIC_API_KEY=sk-ant-...`
 
-## Quickstart (CLI)
-
-```bash
-# List the skills discovered in the example workspace
-agent-ops skills
-
-# Show the routing decisions for a request, which skills, guides, memories
-agent-ops plan "break down net new MRR, expansion vs new bookings this quarter"
-
-# Run the full pipeline (offline echo backend)
-agent-ops run --dry-run "how is gross vs net revenue retention trending?"
-
-# Run against the real model (requires ANTHROPIC_API_KEY)
-agent-ops run "how is gross vs net revenue retention trending?"
-```
-
-`plan` output for the first request:
-
-```
-Skills routed:
-  • revenue-analysis (score 1.30)
-  • churn-analysis (score 0.30)
-Memories recalled:
-  • expansion-revenue-priority
-System prompt: 4 blocks (1 cache-eligible).
-```
-
-## Quickstart (library)
-
-```python
-from agent_ops import Agent
-
-agent = Agent.from_workspace("examples/saas_analyst")
-
-# See what the agent would do (no model call)
-print(agent.plan("how is churn trending?").summary())
-
-# Run it (uses the real model if ANTHROPIC_API_KEY is set, else the echo backend)
-completion = agent.run("how is churn trending?")
-print(completion.text)
-
-# Teach it something durable, recalled on future relevant requests
-agent.learn(
-    description="Pricing rose 10% on the Pro tier in June",
-    body="List price on the Pro tier increased from $40 to $44/seat in June 2026.",
-    type="project",
-)
-```
-
-## Build your own agent
-
-Create a workspace directory:
+## Add a domain (no code change)
 
 ```
 my_agent/
 ├── agent.json            # { "domain": "...", "instructions": "..." }
 ├── skills/               # one markdown file per skill (frontmatter + body)
-├── guides/               # long-form reference material, loaded on demand
-├── memory/               # persistent facts (the agent also writes here)
+├── guides/               # long-form reference, loaded on demand
+├── memory/               # persistent facts (the agent writes here too)
 ├── settings.json         # durable permissions
-└── settings.local.json   # local overrides (gitignore this)
+└── settings.local.json   # local overrides (gitignored)
 ```
 
-A skill is just markdown with frontmatter:
+Then `Agent.from_workspace("my_agent")`. See [ARCHITECTURE.md](ARCHITECTURE.md)
+for the routing algorithm and prompt-cache strategy.
 
-```markdown
----
-name: incident-triage
-description: Triage and prioritize production incidents by severity
-triggers: [incident, outage, sev1, pager, downtime]
----
-When triaging an incident: classify severity first (Sev1-Sev3), ...
-```
+## Methodology
 
-Then: `Agent.from_workspace("my_agent")`. No framework code changes.
+- Routing/recall use an explainable lexical relevance score (no opaque embedding step), so a routing decision can be read and understood; swapping in embeddings means replacing one function.
+- The token-efficiency figures come from `examples/cost_analysis.py`, and the routing-is-smaller property is enforced by a test.
+- Prompt caching follows the prefix-match rule: stable content first, single breakpoint on the last stable block.
 
-## Design
+## Limitations
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the module breakdown, the routing
-algorithm, and the prompt-cache strategy.
+- Lexical routing can miss paraphrases an embedding model would catch; it is a deliberate simplicity/explainability trade.
+- No multi-step tool-use loop yet; this is the context-and-routing layer, not a full agent runtime.
+- The example workspace is intentionally small, so its absolute token numbers are modest; the routing saving is what scales.
 
-## Tests
+## Roadmap
 
-```bash
-pytest          # 26 tests, runs fully offline
-```
+- Optional embedding-based routing behind the same interface.
+- A routing-precision eval harness (did the right skill fire?).
+- A multi-step tool-use loop on top of the context layer.
+- More backends behind the `LLMClient` protocol.
 
 ## License
 

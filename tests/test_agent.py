@@ -2,6 +2,20 @@ from agent_ops import Agent, EchoLLM
 from agent_ops.llm import SystemBlock
 
 
+def test_on_demand_routing_is_smaller_than_loading_everything(workspace):
+    """The core efficiency lever: a routed prompt is materially smaller than
+    loading every skill and guide on every call (measured in characters to stay
+    dependency-free; cost_analysis.py reports the token-level figure)."""
+    agent = Agent.from_workspace(workspace, llm=EchoLLM())
+    load_everything = (
+        len(agent.instructions)
+        + sum(len(s.instructions) for s in agent.skills.skills)
+        + sum(len(g.load()) for g in agent.guides.guides)
+    )
+    routed = sum(len(b.text) for b in agent.plan("how is churn and net revenue retention trending?").system)
+    assert routed < load_everything
+
+
 def test_plan_assembles_stable_prefix_then_volatile(workspace):
     agent = Agent.from_workspace(workspace, llm=EchoLLM())
     plan = agent.plan("break down net new MRR: expansion vs new")
