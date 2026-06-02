@@ -87,7 +87,7 @@ class AnthropicLLM:
         volatile = [b for b in system if not b.stable]
         blocks: list[dict] = []
         for i, b in enumerate(stable):
-            block = {"type": "text", "text": b.text}
+            block: dict[str, object] = {"type": "text", "text": b.text}
             if i == len(stable) - 1:  # last stable block carries the breakpoint
                 block["cache_control"] = {"type": "ephemeral"}
             blocks.append(block)

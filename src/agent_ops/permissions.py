@@ -31,7 +31,7 @@ class Permissions:
     deny: list[str] = field(default_factory=list)
 
     @classmethod
-    def load(cls, durable: str | Path, local: str | Path | None = None) -> "Permissions":
+    def load(cls, durable: str | Path, local: str | Path | None = None) -> Permissions:
         allow: list[str] = []
         deny: list[str] = []
         for path in (durable, local):

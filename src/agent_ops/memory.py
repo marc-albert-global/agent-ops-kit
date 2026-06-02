@@ -43,7 +43,7 @@ class Memory:
     path: Path | None = None
 
     @classmethod
-    def from_file(cls, path: Path) -> "Memory":
+    def from_file(cls, path: Path) -> Memory:
         doc = frontmatter.parse(path.read_text(encoding="utf-8"))
         meta = doc.meta
         return cls(
@@ -73,7 +73,7 @@ class MemoryStore:
     memories: list[Memory] = field(default_factory=list)
 
     @classmethod
-    def open(cls, directory: str | Path) -> "MemoryStore":
+    def open(cls, directory: str | Path) -> MemoryStore:
         directory = Path(directory)
         directory.mkdir(parents=True, exist_ok=True)
         memories = [
@@ -95,15 +95,16 @@ class MemoryStore:
     def learn(self, description: str, body: str, *, type: str = "note", name: str | None = None) -> Memory:
         """Persist a new fact and add it to the in-memory index."""
         name = name or slugify(description)
+        path = self.directory / f"{name}.md"
         memory = Memory(
             name=name,
             description=description,
             body=body,
             type=type,
             created=_dt.date.today().isoformat(),
-            path=self.directory / f"{name}.md",
+            path=path,
         )
-        memory.path.write_text(memory.to_markdown(), encoding="utf-8")
+        path.write_text(memory.to_markdown(), encoding="utf-8")
         # Replace any existing memory with the same name.
         self.memories = [m for m in self.memories if m.name != name]
         self.memories.append(memory)

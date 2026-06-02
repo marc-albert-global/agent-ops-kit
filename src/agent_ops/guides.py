@@ -28,16 +28,15 @@ class Guide:
     _body: str = ""
 
     @classmethod
-    def from_file(cls, path: Path) -> "Guide":
+    def from_file(cls, path: Path) -> Guide:
         doc = frontmatter.parse(path.read_text(encoding="utf-8"))
         meta = doc.meta
-        keywords = meta.get("keywords", [])
-        if isinstance(keywords, str):
-            keywords = [keywords]
+        raw = meta.get("keywords", [])
+        items: list = [raw] if isinstance(raw, str) else (raw if isinstance(raw, list) else [])
         return cls(
             name=str(meta.get("name", path.stem)),
             description=str(meta.get("description", "")),
-            keywords=tuple(str(k) for k in keywords),
+            keywords=tuple(str(k) for k in items),
             path=path,
             _body=doc.body,
         )
@@ -54,7 +53,7 @@ class GuideLibrary:
     guides: list[Guide] = field(default_factory=list)
 
     @classmethod
-    def from_dir(cls, directory: str | Path) -> "GuideLibrary":
+    def from_dir(cls, directory: str | Path) -> GuideLibrary:
         directory = Path(directory)
         guides = [
             Guide.from_file(p)

@@ -29,7 +29,7 @@ class HookRegistry:
         self.session_start.append(fn)
         return fn
 
-    def run_session_start(self, agent: "Agent") -> list[str]:
+    def run_session_start(self, agent: Agent) -> list[str]:
         out: list[str] = []
         for hook in self.session_start:
             result = hook(agent)
@@ -38,10 +38,11 @@ class HookRegistry:
         return out
 
 
-def default_orientation(agent: "Agent") -> str:
+def default_orientation(agent: Agent) -> str:
     """Built-in session-start hook: summarize available capabilities."""
+    n_memories = len(agent.memory) if agent.memory is not None else 0
     return (
         f"You are operating in the '{agent.domain}' domain. "
         f"{len(agent.skills)} skills and {len(agent.guides)} reference guides are available, "
-        f"loaded on demand. {len(agent.memory)} memories are on file."
+        f"loaded on demand. {n_memories} memories are on file."
     )

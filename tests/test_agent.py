@@ -50,7 +50,11 @@ def test_anthropic_block_builder_marks_last_stable_block():
     # Verify the cache breakpoint lands on the last stable block without a key.
     from agent_ops.llm import AnthropicLLM
 
-    blocks = [SystemBlock("framework", stable=True), SystemBlock("guides", stable=True), SystemBlock("request ctx", stable=False)]
+    blocks = [
+        SystemBlock("framework", stable=True),
+        SystemBlock("guides", stable=True),
+        SystemBlock("request ctx", stable=False),
+    ]
     built = AnthropicLLM.__dict__["_build_system"](object.__new__(AnthropicLLM), blocks)
     assert "cache_control" not in built[0]
     assert built[1]["cache_control"] == {"type": "ephemeral"}

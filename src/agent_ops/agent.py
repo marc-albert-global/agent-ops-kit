@@ -75,7 +75,7 @@ class Agent:
     # ---- construction -----------------------------------------------------
 
     @classmethod
-    def from_workspace(cls, path: str | Path, *, llm: LLMClient | None = None) -> "Agent":
+    def from_workspace(cls, path: str | Path, *, llm: LLMClient | None = None) -> Agent:
         """Load an agent from a workspace directory.
 
         Layout:

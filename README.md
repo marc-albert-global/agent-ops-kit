@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/marc-albert-global/agent-ops-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/marc-albert-global/agent-ops-kit/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue)
+![lint: ruff](https://img.shields.io/badge/lint-ruff-261230)
+![types: mypy](https://img.shields.io/badge/types-mypy-2a6db2)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
 **Stand up a domain expert AI agent for a team without rebuilding the plumbing,
@@ -90,7 +92,7 @@ agent-ops skills                                   # list discovered skills
 agent-ops plan "how is net revenue retention trending?"   # show routing decisions
 agent-ops run --dry-run "how is churn trending?"   # full pipeline, offline backend
 python examples/cost_analysis.py                   # token-efficiency numbers
-pytest -q                                          # 27 tests, fully offline
+ruff check src tests && mypy && pytest -q          # lint + type-check + 35 tests, offline
 ```
 
 For real completions: `pip install -e ".[anthropic]" && export ANTHROPIC_API_KEY=sk-ant-...`

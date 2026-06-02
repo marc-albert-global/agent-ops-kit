@@ -28,16 +28,15 @@ class Skill:
     path: Path | None = None
 
     @classmethod
-    def from_file(cls, path: Path) -> "Skill":
+    def from_file(cls, path: Path) -> Skill:
         doc = frontmatter.parse(path.read_text(encoding="utf-8"))
         meta = doc.meta
-        triggers = meta.get("triggers", [])
-        if isinstance(triggers, str):
-            triggers = [triggers]
+        raw = meta.get("triggers", [])
+        items: list = [raw] if isinstance(raw, str) else (raw if isinstance(raw, list) else [])
         return cls(
             name=str(meta.get("name", path.stem)),
             description=str(meta.get("description", "")),
-            triggers=tuple(str(t) for t in triggers),
+            triggers=tuple(str(t) for t in items),
             instructions=doc.body,
             path=path,
         )
@@ -54,7 +53,7 @@ class SkillRegistry:
     skills: list[Skill] = field(default_factory=list)
 
     @classmethod
-    def from_dir(cls, directory: str | Path) -> "SkillRegistry":
+    def from_dir(cls, directory: str | Path) -> SkillRegistry:
         directory = Path(directory)
         skills = [
             Skill.from_file(p)

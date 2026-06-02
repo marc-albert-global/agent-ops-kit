@@ -52,8 +52,9 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "memory":
         agent = _load(args.workspace, dry_run=True)
-        print(f"{len(agent.memory)} memories in {args.workspace}:")
-        for m in agent.memory.memories:
+        memories = agent.memory.memories if agent.memory else []
+        print(f"{len(memories)} memories in {args.workspace}:")
+        for m in memories:
             print(f"  • [{m.type}] {m.name}, {m.description}")
         return 0
 
