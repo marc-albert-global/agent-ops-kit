@@ -1,5 +1,9 @@
 # agent-ops-kit
 
+[![CI](https://github.com/MarcAlbert06800/agent-ops-kit/actions/workflows/ci.yml/badge.svg)](https://github.com/MarcAlbert06800/agent-ops-kit/actions/workflows/ci.yml)
+![Python](https://img.shields.io/badge/python-3.9%2B-blue)
+![License: MIT](https://img.shields.io/badge/license-MIT-green)
+
 A small, dependency-light framework for building **domain-agnostic LLM
 operations agents** — the kind that sit next to a team, answer questions
 against a body of domain knowledge, and get sharper with use.
